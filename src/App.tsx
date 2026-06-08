@@ -382,13 +382,25 @@ function App() {
       return;
     }
 
-    const nextRecord = buildRecord(activeRecord, title, markdown, origin);
+    const shouldCreateRecord =
+      activeRecord.id === "sample" || activeRecord.content !== markdown;
+    const titleWasCarriedOver = title.trim() === activeRecord.title.trim();
+    const nextTitle =
+      shouldCreateRecord && titleWasCarriedOver
+        ? makeDocumentTitle(undefined, markdown)
+        : title;
+    const nextRecord = buildRecord(
+      shouldCreateRecord ? undefined : activeRecord,
+      nextTitle,
+      markdown,
+      origin,
+    );
     await saveRecord(nextRecord);
     setActiveRecord(nextRecord);
     setTitle(nextRecord.title);
     await runCleanup("auto");
     await refreshRecords();
-    setStatus(`已保存：${nextRecord.title}`);
+    setStatus(`${shouldCreateRecord ? "已新增" : "已保存"}：${nextRecord.title}`);
   }
 
   async function loadRecord(record: MarkdownRecord) {
